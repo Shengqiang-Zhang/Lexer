@@ -129,7 +129,7 @@ public class GenerateXML {
             }
         } while (lineText != null); //遇到空行则分段
 
-        writeXML(document, "testFile/segmentXML");
+        writeXML(document, "testFile/LexerXML");
 
     }
 
