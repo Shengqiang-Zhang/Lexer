@@ -5,9 +5,9 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Scanner;
 
 /**
  * Created by zhangsq on 17-11-21.
@@ -18,8 +18,6 @@ public class GenerateXML {
         generateXML.generateXML("testFile/postaginput", "testFile/nerinput");
     }
 
-
-    //
 
     /**
      * preprocessing of text, combine POSTagOutput and NEROutput.
@@ -60,7 +58,7 @@ public class GenerateXML {
                         tag = mapNER.get(seg);
                     }
                 }
-                fw.write(seg + " " + tag + " ");
+                fw.write(seg + tag + " ");
             }
             fw.write("\n");
         }
@@ -73,7 +71,7 @@ public class GenerateXML {
      * @throws IOException
      */
     public void generateXML(String postagfile, String nerFile) throws IOException {
-        String tempFile = "temOutput";
+        String tempFile = "tempOutput";
         preprocessing(postagfile, nerFile, tempFile);
         Document document = DocumentHelper.createDocument();
         Element doc = document.addElement("doc");
@@ -84,11 +82,45 @@ public class GenerateXML {
         InputStreamReader reader = new InputStreamReader(new FileInputStream(inputfile));
         BufferedReader br = new BufferedReader(reader);
         String lineText = br.readLine();
+        int paragraphCount = 0;
         do {
-            Element paragraph = doc.addElement("paragraph");
+            paragraphCount++;
+            Element paragraph = doc.addElement("paragraph").addAttribute("id", String.valueOf(paragraphCount));
+            int sentencesCount = 0;
             do {
-                Element sentence = paragraph.addElement("sentence");
-                Element content = sentence.addText(lineText);
+                sentencesCount++;
+                Element sentence = paragraph.addElement("sentence").addAttribute("id", String.valueOf(sentencesCount));
+                String[] eachword = lineText.split(" ");
+                int wordsCount = eachword.length;
+                Element word = sentence.addElement("wordlist").addAttribute("length", String.valueOf(wordsCount));
+                int nrCount = 0;
+                ArrayList<Integer> index = new ArrayList<>();
+
+                //print wordlist
+                for (int i = 1; i <= wordsCount; i++) {
+                    String seg = eachword[i - 1].split("/")[0];
+                    String tag = eachword[i - 1].split("/")[1];
+                    Element tok = word;
+                    tok.addElement("tok").addAttribute("id", String.valueOf(i)).addAttribute("head", seg).addAttribute("type", tag);
+                    if (tag.equals("LOC") || tag.equals("PER") || tag.equals("ORG")) {
+                        nrCount++;
+                        index.add(i - 1);
+
+                    }
+                }
+
+                //print nrlist
+                Element nrlist = sentence.addElement("nrlist");
+                for (int i = 1; i <= nrCount; i++) {
+                    Element tok = nrlist;
+                    System.out.println("index = " + index);
+                    tok.addElement("tok").addAttribute("id", String.valueOf(i)).addAttribute("head", eachword[index.get(i - 1)].split("/")[0]).addAttribute("type", eachword[index.get(i - 1)].split("/")[1]).addAttribute("start", String.valueOf(index.get(i - 1))).addAttribute("end", String.valueOf(index.get(i - 1)));
+                }
+
+                //print timelist
+                //@TODO
+                Element time = sentence.addElement("time");
+
                 lineText = br.readLine();
 
             } while ((lineText != null) && (lineText.length() > 0)); //每行为一个句子
