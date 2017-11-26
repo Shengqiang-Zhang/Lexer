@@ -19,7 +19,16 @@ public class GenerateXML {
     }
 
 
-    //preprocessing of text, combine POSTagOutput and NEROutput.
+    //
+
+    /**
+     * preprocessing of text, combine POSTagOutput and NEROutput.
+     *
+     * @param postagFile 文件中每行为一句，每段间用空行隔开
+     * @param nerFile    文件中每个词和ner的tag单独在一行
+     * @param outputFile postagFile和nerFile合并的文件
+     * @throws IOException
+     */
     private void preprocessing(String postagFile, String nerFile, String outputFile) throws IOException {
 
         FileWriter fw = new FileWriter(outputFile);
@@ -58,6 +67,11 @@ public class GenerateXML {
         fw.close();
     }
 
+    /**
+     * @param postagfile 文件中每行为一句，每段间用空行隔开
+     * @param nerFile    文件中每个词和ner的tag单独在一行
+     * @throws IOException
+     */
     public void generateXML(String postagfile, String nerFile) throws IOException {
         String tempFile = "temOutput";
         preprocessing(postagfile, nerFile, tempFile);
